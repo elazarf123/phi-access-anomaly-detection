@@ -1,0 +1,5 @@
+rule,severity,user_id,first_seen,detail
+R4_BRUTE_FORCE,CRITICAL,dwilson,2025-06-09 22:15:00,9 failed logins within 10 min on WS-777 FOLLOWED BY SUCCESSFUL LOGIN — possible account compromise
+R3_TERMINATED_ACCESS,CRITICAL,hformer,2025-06-08 10:00:00,4 events after termination date 2025-06-01; actions: VIEW_LABS
+R2_VOLUME_ANOMALY,HIGH,rsmith,2025-06-07 14:00:00,"85 chart views on 2025-06-07 (baseline mean 5.9, threshold 38.5) — 85 distinct patients"
+R1_OFF_HOURS_PHI,HIGH,tbrown,2025-06-05 03:00:00,"6 PHI events between 22:00-06:00 by Billing Specialist (Revenue Cycle), workstation(s): WS-099"
