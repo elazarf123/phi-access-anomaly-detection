@@ -23,6 +23,40 @@ The detector finds **all four with zero false positives**, then writes a severit
 
 Every rule maps to a specific HIPAA Security Rule citation and NIST CSF 2.0 control — documented in [docs/detection_playbook.md](docs/detection_playbook.md). That mapping matters: in a covered entity, "we monitor logs" isn't a control until you can say *which requirement each detection satisfies*. The volume rule (R2) uses a statistical baseline (mean + 3σ) rather than a hard-coded threshold, so it adapts to real staffing patterns.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  LOG["EHR access log<br/>1,346 synthetic events"] --> NORM["Normalize + enrich<br/>(user, role, dept, time)"]
+  NORM --> ENG["Python rules engine"]
+  ENG --> D1["Terminated-account activity"]
+  ENG --> D2["After-hours access"]
+  ENG --> D3["Cross-department snooping"]
+  ENG --> D4["Bulk record scraping"]
+  D1 --> SC["Risk scoring<br/>(severity x confidence)"]
+  D2 --> SC
+  D3 --> SC
+  D4 --> SC
+  SC --> MAP["HIPAA and NIST CSF 2.0<br/>control mapping"]
+  MAP --> OUT["Triage report<br/>for human review"]
+```
+
+Detections are deliberately rules-based rather than ML: in a compliance context every alert
+has to be explainable to an auditor, and a rule states its own reasoning.
+
+## Privacy and security guardrails
+
+- **Synthetic data only.** All 1,346 access events, users, and patient identifiers are
+  generated. No real PHI, patient records, or production logs are used anywhere.
+- **No third-party data egress.** The pipeline runs entirely locally on local files. No
+  cloud service, API, or LLM ever sees the data.
+- **Minimum necessary.** Detection logic reads only the fields required to evaluate a rule
+  (user, role, department, timestamp, record ID) rather than clinical note content.
+- **Explainable alerts.** Each finding records the rule that fired and the evidence behind
+  it, so a reviewer can confirm or dismiss it without rerunning the pipeline.
+- **Human review, not enforcement.** Output is a triage queue. Nothing is auto-escalated or
+  auto-disabled, which reflects how real insider-threat review actually works.
+
 ## Repository structure
 
 ```
